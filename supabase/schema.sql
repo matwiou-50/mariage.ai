@@ -2,7 +2,7 @@
 -- À coller dans Supabase > SQL Editor > New query > Run.
 -- Chaque table est rattachée à un mariage (wedding_id) : c'est ce qui sépare les couples.
 
-create extension if not exists "pgcrypto";
+create extension if not exists pgcrypto with schema extensions;
 
 -- ---------- Tables ----------
 
@@ -47,7 +47,7 @@ create table public.households (
   wedding_id uuid not null references public.weddings on delete cascade,
   name text not null,                          -- "Famille Martin"
   email text,
-  code text not null unique default encode(gen_random_bytes(5), 'hex'),  -- code d'accès invité
+  code text not null unique default encode(extensions.gen_random_bytes(5), 'hex'),  -- code d'accès invité
   responded_at timestamptz,
   created_at timestamptz not null default now()
 );
@@ -155,6 +155,19 @@ create policy answers_member on public.answers for all
   with check (exists (select 1 from public.guests g where g.id = guest_id and public.is_member(g.wedding_id)));
 create policy payments_member on public.payments for select using (public.is_member(wedding_id));
 
+-- Droits d'accès explicites (certains projets Supabase n'exposent plus les nouvelles tables par défaut).
+-- Les invités passent par le serveur (service_role) : le rôle anon n'a besoin d'aucune table.
+revoke all on all tables in schema public from anon;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant all on all tables in schema public to service_role;
+
+-- Un couple ne peut pas changer lui-même son offre (plan) : seul le webhook Stripe le fait.
+revoke update on public.weddings from authenticated;
+grant update (couple_names, wedding_date, location, welcome_text, theme, sections, access_code, rsvp_deadline)
+  on public.weddings to authenticated;
+-- Les paiements sont écrits uniquement par le webhook Stripe.
+revoke insert, update, delete on public.payments from authenticated;
+
 -- Les invités n'ont pas de compte : le site public lit et écrit via le serveur
 -- de l'application avec la clé "service role" (jamais exposée au navigateur).
 
@@ -175,6 +188,9 @@ begin
   return w;
 end $$;
 
+revoke execute on function public.create_wedding(text, text) from public, anon;
+grant execute on function public.create_wedding(text, text) to authenticated;
+
 -- ---------- Suppression des données après le mariage (RGPD) ----------
 -- Supprime les mariages dont la date est passée depuis plus de 6 mois.
 -- À programmer avec l'extension pg_cron (Database > Extensions) :
@@ -188,3 +204,4 @@ begin
   get diagnostics n = row_count;
   return n;
 end $$;
+revoke execute on function public.purge_old_weddings() from public, anon, authenticated;

@@ -22,10 +22,12 @@ export async function saveRsvp(formData: FormData) {
 
   const { data: guests } = await db.from("guests").select("id").eq("household_id", h!.id);
   const consent = formData.get("consent") === "on";
+  const allergiesOf = (id: string) => String(formData.get(`allergies_${id}`) ?? "").trim().slice(0, 500);
+  // Vérifié avant toute écriture, pour ne pas enregistrer le foyer à moitié.
+  if (!consent && (guests ?? []).some((g) => allergiesOf(g.id))) back("error=consent");
 
   for (const g of guests ?? []) {
-    const allergies = String(formData.get(`allergies_${g.id}`) ?? "").trim().slice(0, 500);
-    if (allergies && !consent) back("error=consent");
+    const allergies = allergiesOf(g.id);
     await db
       .from("guests")
       .update({
