@@ -2,12 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
-import { appUrl } from "@/lib/config";
+import { appUrl, supabaseUrl } from "@/lib/config";
 
 export async function sendMagicLink(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   if (!email.includes("@")) redirect("/login?error=email");
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const url = supabaseUrl();
   if (!url.startsWith("https://") || url.includes("xxxx") || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     console.error("[login] .env.local incomplet : NEXT_PUBLIC_SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_ANON_KEY manquant (redémarrez npm run dev après l'avoir rempli).");
     redirect("/login?error=config");

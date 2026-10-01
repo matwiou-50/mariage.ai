@@ -29,3 +29,14 @@ export const isValidSlug = (s: string) => /^[a-z0-9][a-z0-9-]{1,40}[a-z0-9]$/.te
 
 // Un chemin de redirection ne doit jamais sortir du site.
 export const safePath = (p: string, fallback: string) => (p.startsWith("/") && !p.startsWith("//") ? p : fallback);
+
+// Adresse Supabase réduite à "https://xxxx.supabase.co" : un chemin copié en trop
+// (ex. ".../rest/v1/") provoque sinon l'erreur 404 "Invalid path specified in request URL".
+export function supabaseUrl() {
+  const raw = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return raw;
+  }
+}

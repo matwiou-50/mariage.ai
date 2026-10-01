@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { supabaseUrl } from "@/lib/config";
 
 const RESERVED = new Set(["www", "app", "api", "admin"]);
 
@@ -29,7 +30,7 @@ export async function middleware(req: NextRequest) {
 // ne peuvent pas écrire de cookie, c'est donc fait ici avant chaque page du tableau de bord.
 async function refreshSession(req: NextRequest) {
   let res = NextResponse.next({ request: req });
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  const supabase = createServerClient(supabaseUrl(), process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {
       getAll: () => req.cookies.getAll(),
       setAll: (list: { name: string; value: string; options: CookieOptions }[]) => {
