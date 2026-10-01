@@ -9,6 +9,9 @@ export async function GET(request: Request) {
     const supabase = await supabaseServer();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(`${origin}/dashboard`);
+    console.error("[auth] Échec de l'ouverture de session :", error.status, error.code, error.message);
+  } else {
+    console.error("[auth] Retour du lien sans code :", searchParams.toString() || "(vide)");
   }
   return NextResponse.redirect(`${origin}/login?error=link`);
 }

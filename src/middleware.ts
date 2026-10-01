@@ -22,6 +22,14 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Si l'adresse /auth/callback n'est pas autorisée dans Supabase, le lien magique revient
+  // sur la page d'accueil avec ?code=... : on le renvoie au bon endroit pour ouvrir la session.
+  if (pathname === "/" && req.nextUrl.searchParams.has("code")) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    return NextResponse.redirect(url);
+  }
+
   if (pathname.startsWith("/dashboard")) return refreshSession(req);
   return NextResponse.next();
 }
