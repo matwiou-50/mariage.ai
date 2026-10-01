@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { supabaseServer } from "@/lib/supabase/server";
 import { sendMagicLink } from "./actions";
 
 const ERRORS: Record<string, string> = {
@@ -10,6 +12,9 @@ const ERRORS: Record<string, string> = {
 
 export default async function Login({ searchParams }: { searchParams: Promise<{ sent?: string; error?: string }> }) {
   const { sent, error } = await searchParams;
+  // Déjà connecté (ex. bouton « Créer mon site » de l'accueil) : pas besoin de redemander l'e-mail.
+  const { data } = await (await supabaseServer()).auth.getUser();
+  if (data.user) redirect("/dashboard");
   return (
     <main className="wrap">
       <h1>Connexion</h1>
