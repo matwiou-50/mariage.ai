@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseAdmin, weddingBySlug } from "@/lib/supabase/admin";
 import { fontsUrl, safeTheme, themeStyle } from "@/lib/theme";
 
 const fmtDate = (d: string | null) =>
@@ -12,7 +12,7 @@ const fmtTime = (d: string | null) =>
 export default async function Site({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const db = supabaseAdmin();
-  const { data: w } = await db.from("weddings").select("*").eq("slug", slug).maybeSingle();
+  const w = await weddingBySlug(slug);
   if (!w) notFound();
   const { data: events } = await db.from("events").select("*").eq("wedding_id", w.id).order("position").order("starts_at");
 

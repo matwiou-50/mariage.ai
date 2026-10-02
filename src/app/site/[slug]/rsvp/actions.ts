@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseAdmin, weddingBySlug } from "@/lib/supabase/admin";
 import { safePath } from "@/lib/config";
 
 const tri = (v: FormDataEntryValue | null) => (v === "yes" ? true : v === "no" ? false : null);
@@ -14,7 +14,7 @@ export async function saveRsvp(formData: FormData) {
   const back = (q: string) => redirect(`${base}/rsvp?code=${encodeURIComponent(code)}&${q}`);
 
   const db = supabaseAdmin();
-  const { data: w } = await db.from("weddings").select("id, rsvp_deadline").eq("slug", slug).maybeSingle();
+  const w = await weddingBySlug(slug, "id, rsvp_deadline");
   if (!w) redirect(base || "/");
   const { data: h } = await db.from("households").select("id").eq("wedding_id", w.id).eq("code", code).maybeSingle();
   if (!h) back("error=code");

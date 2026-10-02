@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseAdmin, weddingBySlug } from "@/lib/supabase/admin";
 import { fontsUrl, safeTheme, themeStyle } from "@/lib/theme";
 import { saveRsvp } from "./actions";
 
@@ -28,7 +28,7 @@ export default async function Rsvp({
   const { slug } = await params;
   const { code, done, error } = await searchParams;
   const db = supabaseAdmin();
-  const { data: w } = await db.from("weddings").select("*").eq("slug", slug).maybeSingle();
+  const w = await weddingBySlug(slug);
   if (!w) notFound();
   const base = (await headers()).get("x-site-base") ?? `/site/${slug}`;
   const theme = safeTheme(w.theme);
