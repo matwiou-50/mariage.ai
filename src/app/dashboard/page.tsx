@@ -44,7 +44,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       {paid && <p className="ok">Merci ! Votre offre sera activée dans quelques instants.</p>}
       <div className="card">
         <strong>Votre site : </strong>
-        <a href={url} target="_blank" rel="noreferrer">{url}</a>
+        <a href={url}>{url}</a>
         <p className="muted">Offre actuelle : {wedding.plan === "free" ? "Essentiel (gratuite)" : wedding.plan === "custom" ? "Sur mesure" : "Logistique"}</p>
       </div>
       <div className="row">

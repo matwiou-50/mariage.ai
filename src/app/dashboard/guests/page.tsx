@@ -61,7 +61,7 @@ export default async function Guests({ searchParams }: { searchParams: Promise<{
               <td>{yesNo(g.sleeps_on_site)}</td>
               <td>{g.diet}</td>
               <td>{g.allergies}</td>
-              <td>{g.households && <a href={link(g.households.code)} target="_blank" rel="noreferrer">lien</a>}</td>
+              <td>{g.households && <a href={link(g.households.code)}>lien</a>}</td>
             </tr>
           ))}
         </tbody>
