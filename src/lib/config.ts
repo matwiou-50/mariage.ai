@@ -1,6 +1,13 @@
 const RESERVED = ["www", "app", "api", "admin", "site", "dashboard", "login"];
 
-export const rootDomain = () => process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+// Domaine principal, sans "http://", espace ni "/" final (ex. "localhost:3000" ou "tondomaine.fr").
+export const rootDomain = () =>
+  (process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "")
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .toLowerCase() || "localhost:3000";
 
 // Adresse publique du site d'un couple.
 export function siteUrl(slug: string) {

@@ -1,13 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { supabaseUrl } from "@/lib/config";
+import { rootDomain, supabaseUrl } from "@/lib/config";
 
 const RESERVED = new Set(["www", "app", "api", "admin"]);
 
 // Un seul programme sert tous les couples :
 // charlotte-matthieu.tondomaine.fr  ->  /site/charlotte-matthieu
 export async function middleware(req: NextRequest) {
-  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost:3000";
+  const root = rootDomain();
   const host = (req.headers.get("host") ?? "").toLowerCase();
   const { pathname } = req.nextUrl;
 
